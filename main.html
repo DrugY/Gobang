@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>五子棋</title>
+</head>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript">
+	//全局变量
+	var turn=0; //轮到黑棋:0/白棋:1
+	var chessboard = new Array()
+	var boardsize=15
+	var depth=2
+	var cpucolor=1;
+</script>
+<script type="text/javascript" src="js/support.js"></script>
+<script type="text/javascript" src="js/evaluate.js"></script>
+<script type="text/javascript" src="js/calculate.js"></script>
+<script type="text/javascript">
+	//绘制落子
+	function dochess(x,y,c){ //落子 c=黑0:白1
+		var color;
+		if (c)
+			color="white";
+		else
+			color="black";
+		var cxt=document.getElementById("background").getContext("2d");
+		cxt.beginPath();
+		cxt.arc(x*35+22,y*35+22,12,0,360);
+		cxt.fillStyle=color;
+		cxt.fill();
+		cxt.closePath();
+		chessboard[y][x]=c
+	}
+
+	window.onload=function(){
+
+	/*初始化*/
+		//显示大小
+		var background=document.getElementById("background")
+		background.style.left=parseInt((document.body.clientWidth-background.width)/2).toString()+"px";
+		//棋盘值
+		for(var i=0;i<boardsize;i++)
+		{
+			chessboard[i] = new Array()
+			for(var k = 0; k < boardsize; k++)
+				chessboard[i][k]=-1;
+		}
+
+	/*键盘点击操作*/
+		background.onclick=function(e){
+			var ev = e || window.event;
+			var x = ev.offsetX-22
+			var y = ev.offsetY-22
+			var tx = parseInt(x/35+0.5)
+			var ty = parseInt(y/35+0.5)
+			var dev=10    //允许误差像素值
+			if (Math.abs(x-tx*35)>dev || Math.abs(y-ty*35)>dev || chessboard[ty][tx]!=-1){
+				return true
+			}
+			//alert(x.toString()+","+y.toString())
+			dochess(tx,ty,turn)
+			turn=1-turn;
+			target = calnext(chessboard,turn)
+			console.log(target)
+			dochess(target[1],target[0],turn)
+			turn=1-turn
+			console.log("turn",turn)
+		}
+	}
+	window.onresize=function(){
+		var background=document.getElementById("background")
+		background.style.left=parseInt((document.body.clientWidth-background.width)/2).toString()+"px";
+	}
+</script>
+<style type="text/css">
+	#background{
+		position : fixed;
+		z-index : 1;
+		left: 50%;
+		top: 20%;
+		background-image: url("img/board.jpg");
+		background-repeat:no-repeat;
+		background-size:100%,100%;
+	}
+</style>
+<body>
+<canvas id="background" width="535" height="535"></canvas>
+</body>
+</html>
