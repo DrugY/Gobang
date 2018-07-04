@@ -71,23 +71,22 @@ function calscore(len,block)
 
 
 
-function doscore(row,color)
+function doscore(r,color)
 {
+	var row=JSON.parse(JSON.stringify(r))
 	var len,block;
 	var score=0;
 	var flag=true;
-	var bflag=false
 	for(var j=0;j<row.length;j++)
 	{
 		if(row[j]!=color)
 			continue
-		if(j==0||row[j-1]!=-1||bflag)
+		if(j==0||row[j-1]!=-1)
 			block=1
 		else
 			block=0
 		len=0;
-		flag=true;
-		bflag=false;
+		flag=true
 		for(;j<row.length;j++)//存在 00*00 隐患
 		{
 			if(row[j]==color)
@@ -99,7 +98,7 @@ function doscore(row,color)
 					break;
 				}
 			}
-			else if(row[j]==-1&&j!=row.length-1&&row[j+1]==color&&(len<=3||(block&&len==4)))
+			else if((len<=3||(block&&len==4))&&row[j]==-1&&j!=row.length-1&&row[j+1]==color)
 			{
 				flag=false
 				var tlen=len;
@@ -133,13 +132,13 @@ function doscore(row,color)
 				{
 					score+=calscore(Math.min(tlen+1,4),1);//伪tlen+1
 					if(tlen-len>=3)
-						bflag=true;
+						row[j]=1-color;
 				}
 				else//堵一个
 				{
 					score+=calscore(Math.min(tlen,4),1);
 					if(tlen-len>=3)
-						bflag=true;
+						row[j]=1-color;
 					if(bblock)
 						j=t;
 				}

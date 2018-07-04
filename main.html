@@ -7,10 +7,30 @@
 <script type="text/javascript">
 	//全局变量
 	var turn=0; //轮到黑棋:0/白棋:1
-	var chessboard = new Array()
+	var chessboard = [
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+	];
 	var boardsize=15
-	var depth=2
+	var loading=false
+	var depth=4
 	var cpucolor=1;
+	var flag=true
+	var historys = [];
+
 </script>
 <script type="text/javascript" src="js/support.js"></script>
 <script type="text/javascript" src="js/evaluate.js"></script>
@@ -29,7 +49,8 @@
 		cxt.fillStyle=color;
 		cxt.fill();
 		cxt.closePath();
-		chessboard[y][x]=c
+		chessboard[y][x]=c;
+		historys.push([y,x])
 	}
 
 	window.onload=function(){
@@ -37,27 +58,83 @@
 	/*初始化*/
 		//显示大小
 		var background=document.getElementById("background")
+		var doback = document.getElementById("back")
+		var doexport = document.getElementById("export")
+
+		doback.onclick = function(e)
+		{
+			var ev = e || window.event;
+			var cxt=document.getElementById("background").getContext("2d");
+			var len = historys.length;
+			if (len<2)
+				return
+			var point1 = historys.pop()
+			chessboard[point1[0]][point1[1]]=-1;
+			cxt.clearRect(point1[1]*35+10,point1[0]*35+10,25,25)
+
+			point1 = historys.pop()
+			chessboard[point1[0]][point1[1]]=-1;
+			cxt.clearRect(point1[1]*35+10,point1[0]*35+10,25,25)
+		}
+
+		doexport.onclick = function(e)
+		{
+			var str="";
+			for(var i=0;i<15;i++)
+			{
+				str+="["+chessboard[i].toString()+"],\n"
+			}
+			console.log(str);
+		}
+
+
 		background.style.left=parseInt((document.body.clientWidth-background.width)/2).toString()+"px";
 		//棋盘值
 		for(var i=0;i<boardsize;i++)
 		{
-			chessboard[i] = new Array()
 			for(var k = 0; k < boardsize; k++)
-				chessboard[i][k]=-1;
+				if(chessboard[i][k]>=0)
+				{
+					dochess(k,i,chessboard[i][k])
+				}
 		}
-
+		background.oncontextmenu = function(e){
+            e.preventDefault();
+        };
+        background.onmouseup = function(e)
+        {
+        	var ev = e || window.event;
+        	if(ev.button!=2)
+        		return
+        	var x = ev.offsetX-22
+			var y = ev.offsetY-22
+			var tx = parseInt(x/35+0.5)
+			var ty = parseInt(y/35+0.5)
+			console.log(tx,ty)
+        }
 	/*键盘点击操作*/
 		background.onclick=function(e){
+			if(loading)
+				return true
+			else
+				loading=true
 			var ev = e || window.event;
 			var x = ev.offsetX-22
 			var y = ev.offsetY-22
 			var tx = parseInt(x/35+0.5)
 			var ty = parseInt(y/35+0.5)
 			var dev=10    //允许误差像素值
+			console.log("clicked？", Math.abs(x-tx*35)>dev, Math.abs(y-ty*35)>dev, chessboard[ty][tx]!=-1, JSON.parse(JSON.stringify(chessboard)));
+			var temp=chessboard[5][5]
+			console.log(temp)
 			if (Math.abs(x-tx*35)>dev || Math.abs(y-ty*35)>dev || chessboard[ty][tx]!=-1){
-				return true
+				return;
 			}
-			//alert(x.toString()+","+y.toString())
+			console.log("clicked!");
+			if(historys.length<4)
+				depth=2;
+			else
+				depth=4
 			dochess(tx,ty,turn)
 			turn=1-turn;
 			target = calnext(chessboard,turn)
@@ -65,8 +142,11 @@
 			dochess(target[1],target[0],turn)
 			turn=1-turn
 			console.log("turn",turn)
+			loading=false
+			console.log(JSON.parse(JSON.stringify(chessboard)))
 		}
 	}
+
 	window.onresize=function(){
 		var background=document.getElementById("background")
 		background.style.left=parseInt((document.body.clientWidth-background.width)/2).toString()+"px";
@@ -84,6 +164,8 @@
 	}
 </style>
 <body>
+<button id="back">悔棋</button>
+<button id="export">导出</button>
 <canvas id="background" width="535" height="535"></canvas>
 </body>
 </html>

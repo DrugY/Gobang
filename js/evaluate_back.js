@@ -76,30 +76,21 @@ function doscore(row,color)
 	var len,block;
 	var score=0;
 	var flag=true;
-	var bflag=false
 	for(var j=0;j<row.length;j++)
 	{
 		if(row[j]!=color)
 			continue
-		if(j==0||row[j-1]!=-1||bflag)
+		if(j==0||row[j-1]!=-1)
 			block=1
 		else
 			block=0
 		len=0;
-		flag=true;
-		bflag=false;
+		flag=true
 		for(;j<row.length;j++)//存在 00*00 隐患
 		{
 			if(row[j]==color)
-			{
-				len++;
-				if(len>=5)
-				{
-					score+=calscore(5,0);
-					break;
-				}
-			}
-			else if(row[j]==-1&&j!=row.length-1&&row[j+1]==color&&(len<=3||(block&&len==4)))
+				len++
+			else if(len<=4&&(!block||len>1)&&row[j]==-1&&j!=row.length-1&&row[j+1]==color)
 			{
 				flag=false
 				var tlen=len;
@@ -110,39 +101,16 @@ function doscore(row,color)
 					else
 						break;
 				}
-				var bblock=false;
+				if(tlen>=4)
+					if(block&&(t==row.length||row[t]!=-1))
+						score+=calscore(3,1);
+					else
+						score+=calscore(4,1)
+				else if(!block||(t!=row.length&&row[t]==-1))
+					score+=calscore(tlen,1)
+
 				if(t==row.length||row[t]!=-1)
-					bblock=true
-				if(tlen-len>=5)
-				{
-					score+=calscore(5,0);//成五
 					j=t;
-				}
-				else if(block&&bblock)//全堵
-				{
-					if(tlen>=4)
-						score+=calscore(4,1);//伪四
-					j=t;
-				}
-				else if(!bblock&&tlen-len==4)//后活四
-				{
-					score+=calscore(4,0);//活四
-					j=t;
-				}
-				else if(!bblock&&!block)//不堵
-				{
-					score+=calscore(Math.min(tlen+1,4),1);//伪tlen+1
-					if(tlen-len>=3)
-						bflag=true;
-				}
-				else//堵一个
-				{
-					score+=calscore(Math.min(tlen,4),1);
-					if(tlen-len>=3)
-						bflag=true;
-					if(bblock)
-						j=t;
-				}
 				break;
 			}
 			else
