@@ -77,10 +77,15 @@ function doscore(row,color)
 	var score=0;
 	var flag=true;
 	var bflag=false
+	var lastblack=-1;
 	for(var j=0;j<row.length;j++)
 	{
 		if(row[j]!=color)
+		{
+			if(row[j]==1-color)
+				lastblack=j;
 			continue
+		}
 		if(j==0||row[j-1]!=-1||bflag)
 			block=1
 		else
@@ -122,6 +127,7 @@ function doscore(row,color)
 				{
 					if(tlen>=4)
 						score+=calscore(4,1);//伪四
+					lastblack=t;
 					j=t;
 				}
 				else if(!bblock&&tlen-len==4)//后活四
@@ -131,17 +137,22 @@ function doscore(row,color)
 				}
 				else if(!bblock&&!block)//不堵
 				{
-					score+=calscore(Math.min(tlen+1,4),1);//伪tlen+1
-					if(tlen-len>=3)
-						bflag=true;
+					score+=calscore(Math.min(tlen+1,4),1)-2*calscore(tlen-len,1);//伪tlen+1
+					bflag=true;
 				}
 				else//堵一个
 				{
 					score+=calscore(Math.min(tlen,4),1);
-					if(tlen-len>=3)
-						bflag=true;
 					if(bblock)
+					{
 						j=t;
+						lastblack=t;
+					}
+					else
+					{
+						bflag=true;
+						score-=2*calscore(tlen-len,1)
+					}
 				}
 				break;
 			}
@@ -151,7 +162,23 @@ function doscore(row,color)
 		if(j==row.length||row[j]!=-1)
 			block++;
 		if(flag)
+		{
+			if(block<2&&j>lastblack&&j-lastblack<=6)
+			{
+				for(var k=1;k<=5;k++)
+				{
+					if(j+k==row.length||row[j+k]==1-color)
+						break
+				}
+				if(j+k-lastblack<6)
+					block=2
+				else if(j+k-lastblack==6)
+					block=1;
+			}
+			if(j==row.length||row[j]!=-1)
+				lastblack=j;
 			score+=calscore(len,block)
+		}
 	}
 	return score;
 }
@@ -159,6 +186,12 @@ function doscore(row,color)
 
 function evaluate(board)
 {
+	acounttemp+=1;
+	if(ematch.hasOwnProperty(mainz.code))
+	{
+		tacountt+=1;
+		return ematch[mainz.code];
+	}
 	var rows = flat(board)
 	var score0=0;
 	var score1=0;
@@ -168,6 +201,6 @@ function evaluate(board)
 		score0+=doscore(rows[i],0);
 		score1+=doscore(rows[i],1);
 	}
-	//output("score:"+score0.toString()+" "+score1.toString(),board)
+	ematch[mainz.code] = [score0,score1,cpucolor?score1-score0:score0-score1];
 	return [score0,score1,cpucolor?score1-score0:score0-score1];
 }

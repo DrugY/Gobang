@@ -8,51 +8,63 @@ function choices(board,turn) {
 	var one=[]
 	var zero=[]
 
-	for (var p = 0; p < boardsize; p++)
-		for (var q = 0; q < boardsize; q++)
-		{
-			if(board[p][q] ==-1)
+	var aboard = JSON.parse(JSON.stringify(board))
+	var avilible = new Array()
+	for (var i = 0; i < boardsize; i++)
+		for (var j = 0; j < boardsize; j++)
+			if (aboard[i][j] >= 0)
 			{
-				if(!hasNeighbor(board,p,q,2,2))
-				{
-					continue
-				}
-				var scores = new Array()
-				board[p][q] = 0
-				mainz.cal(p,q,0);
-				scores[0] = evaluate(board)[0]
-				mainz.cal(p,q,0);
-				mainz.cal(p,q,1);
-				board[p][q] = 1
-				scores[1] = evaluate(board)[1]
-				mainz.cal(p,q,1);
-				board[p][q] = -1
-				if(scores[turn]>=100000)
-					return [[p,q]];
-				if(scores[1-turn]>=100000)
-					five.push([p,q])
-				else if(scores[turn]>=10000)
-					four.unshift([p,q])
-				else if(scores[1-turn]>=10000)
-					four.push([p,q])
-				else if(scores[turn]>=2000)
-					tthree.unshift([p,q])
-				else if(scores[1-turn]>=2000)
-					tthree.push([p,q])
-				else if(scores[turn]>=1000)
-					three.unshift([p,q])
-				else if(scores[1-turn]>=1000)
-					three.push([p,q])
-				else if(scores[turn]>=100)
-					two.unshift([p,q])
-				else if(scores[1-turn]>=100)
-					two.push([p,q])
-				else if(hasNeighbor(board,p,q,1,1))
-					one.push([p,q])
-				else
-					zero.push([p,q]);
+				for (var p = Math.max(i-2,0); p <= Math.min(i+2,boardsize-1); p++)
+					for (var q = Math.max(j-2,0); q <= Math.min(j+2,boardsize-1); q++)
+					{
+						if (aboard[p][q] == -1)
+						{
+							if(!hasNeighbor(board,p,q))
+							{
+								zero.push([p,q])
+								aboard[p][q]=-2
+								continue
+							}
+							var scores = new Array()
+							board[p][q] = 0
+							mainz.cal(p,q,0);
+							scores[0] = evaluate(board)[0]
+							mainz.cal(p,q,0);
+							mainz.cal(p,q,1);
+							board[p][q] = 1
+							scores[1] = evaluate(board)[1]
+							mainz.cal(p,q,1);
+							board[p][q] = -1
+							if(scores[cpucolor]>=100000)
+							{
+								return [[p,q]];
+							}
+							if(scores[1-cpucolor]>=100000)
+								five.push([p,q])
+							else if(scores[cpucolor]>=10000)
+							{
+								four.unshift([p,q])
+							}
+							else if(scores[1-cpucolor]>=10000)
+								four.push([p,q])
+							else if(scores[cpucolor]>=2000)
+								tthree.unshift([p,q])
+							else if(scores[1-cpucolor]>=2000)
+								tthree.push([p,q])
+							else if(scores[cpucolor]>=1000)
+								three.unshift([p,q])
+							else if(scores[1-cpucolor]>=1000)
+								three.push([p,q])
+							else if(scores[cpucolor]>=100)
+								two.unshift([p,q])
+							else if(scores[1-cpucolor]>=100)
+								two.push([p,q])
+							else
+								one.push([p,q])
+							aboard[p][q]=-2
+						}
+					}
 			}
-		}
 	if(five.length)
 	{
 		return [five[0]]
@@ -77,24 +89,6 @@ function getfrommax(ary, max) {
 
 
 function calnext(board, turn) {
-	if(historys.length==0)
-		return [7,7];
-	if(historys.length==1)
-	{
-		var ch = [-1,1,0];
-		console.log(historys[0])
-		return [historys[0][0]+ch[Math.floor(Math.random()*3)],historys[0][1]+ch[Math.floor(Math.random()*2)]]
-	}
-	console.time("killer")
-	var killer = maxkill(board,turn,1);
-	console.timeEnd("killer")
-	console.time("regular")
-	if(killer!=false)
-	{
-		console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",killer);
-		console.timeEnd("regular")
-		return killer;
-	}
 	var childs = choices(board,turn)
 	flag=false
 	var besti = 0;
@@ -110,7 +104,6 @@ function calnext(board, turn) {
 		board[childs[i][0]][childs[i][1]] = -1;
 		mainz.cal(childs[i][0],childs[i][1],turn);
 	}
-	console.timeEnd("regular")
 	return childs[besti]
 }
 
@@ -119,16 +112,6 @@ function callayer(board, turn, max, count, alpha) {
 	{
 		return evaluate(board)[2]
 	}
-	/*
-	if(count==1)
-	{
-		console.time("child_kill")
-		var killer = maxkill(board,turn,1);
-		console.timeEnd("child_kill")
-		if(killer!=false)
-			return -100000;
-
-	}*/
 	var childs = choices(board,turn)
 	var best=max?-99999999:99999999;
 	for (var i = 0; i < childs.length; i++) {

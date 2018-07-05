@@ -7,6 +7,7 @@
 <script type="text/javascript">
 	//全局变量
 	var turn=0; //轮到黑棋:0/白棋:1
+
 	var chessboard = [
 	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
 	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
@@ -24,35 +25,61 @@
 	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
 	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
 	];
+	/*
+	var chessboard = [
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,1,-1,0,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,1,-1,-1,0,1,1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,0,-1,0,0,1,0,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,1,0,-1,0,1,0,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,0,1,1,1,1,0,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,1,-1,0,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+
+	];
+	*/
 	var boardsize=15
 	var loading=false
 	var depth=4
+	var maxdepth=12;
 	var cpucolor=1;
 	var flag=true
 	var historys = [];
+	var acounttemp=0;
+	var tacountt=0;
+	var chessupdate=true;
 
 </script>
 <script type="text/javascript" src="js/support.js"></script>
+<script type="text/javascript">
+	var mainz = new Zobrist();
+	var ematch = new Array();
+	function dodraw()
+	{
+		if(chessupdate)
+		{
+			for(var i=0;i<boardsize;i++)
+				for(var k = 0; k < boardsize; k++)
+					if(chessboard[i][k]>=0)
+					{
+						drawchess(k,i,chessboard[i][k])
+					}
+			chessupdate=false;
+		}
+	}
+	var drawchesses = setInterval("dodraw()",50);
+</script>
 <script type="text/javascript" src="js/evaluate.js"></script>
 <script type="text/javascript" src="js/calculate.js"></script>
+<script type="text/javascript" src="js/kill.js"></script>
 <script type="text/javascript">
-	//绘制落子
-	function dochess(x,y,c){ //落子 c=黑0:白1
-		var color;
-		if (c)
-			color="white";
-		else
-			color="black";
-		var cxt=document.getElementById("background").getContext("2d");
-		cxt.beginPath();
-		cxt.arc(x*35+22,y*35+22,12,0,360);
-		cxt.fillStyle=color;
-		cxt.fill();
-		cxt.closePath();
-		chessboard[y][x]=c;
-		historys.push([y,x])
-	}
-
 	window.onload=function(){
 
 	/*初始化*/
@@ -70,10 +97,12 @@
 				return
 			var point1 = historys.pop()
 			chessboard[point1[0]][point1[1]]=-1;
+			mainz.cal(point1[0],point1[1],cpucolor);
 			cxt.clearRect(point1[1]*35+10,point1[0]*35+10,25,25)
 
 			point1 = historys.pop()
 			chessboard[point1[0]][point1[1]]=-1;
+			mainz.cal(point1[0],point1[1],1-cpucolor);
 			cxt.clearRect(point1[1]*35+10,point1[0]*35+10,25,25)
 		}
 
@@ -89,15 +118,6 @@
 
 
 		background.style.left=parseInt((document.body.clientWidth-background.width)/2).toString()+"px";
-		//棋盘值
-		for(var i=0;i<boardsize;i++)
-		{
-			for(var k = 0; k < boardsize; k++)
-				if(chessboard[i][k]>=0)
-				{
-					dochess(k,i,chessboard[i][k])
-				}
-		}
 		background.oncontextmenu = function(e){
             e.preventDefault();
         };
@@ -110,7 +130,7 @@
 			var y = ev.offsetY-22
 			var tx = parseInt(x/35+0.5)
 			var ty = parseInt(y/35+0.5)
-			console.log(tx,ty)
+			console.log(ty,tx)
         }
 	/*键盘点击操作*/
 		background.onclick=function(e){
@@ -123,13 +143,13 @@
 			var y = ev.offsetY-22
 			var tx = parseInt(x/35+0.5)
 			var ty = parseInt(y/35+0.5)
+			/*
 			var dev=10    //允许误差像素值
-			console.log("clicked？", Math.abs(x-tx*35)>dev, Math.abs(y-ty*35)>dev, chessboard[ty][tx]!=-1, JSON.parse(JSON.stringify(chessboard)));
-			var temp=chessboard[5][5]
-			console.log(temp)
+			console.log("clicked？", Math.abs(x-tx*35)>dev, Math.abs(y-ty*35)>dev, chessboard[ty][tx]!=-1);
 			if (Math.abs(x-tx*35)>dev || Math.abs(y-ty*35)>dev || chessboard[ty][tx]!=-1){
 				return;
 			}
+			*/
 			console.log("clicked!");
 			if(historys.length<4)
 				depth=2;
@@ -141,9 +161,7 @@
 			console.log(target)
 			dochess(target[1],target[0],turn)
 			turn=1-turn
-			console.log("turn",turn)
 			loading=false
-			console.log(JSON.parse(JSON.stringify(chessboard)))
 		}
 	}
 
