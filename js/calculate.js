@@ -77,9 +77,9 @@ function getfrommax(ary, max) {
 
 
 function calnext(board, turn) {
-	if(historys.length==0)
+	if(!debug&&historys.length==0)
 		return [7,7];
-	if(historys.length==1)
+	if(!debug&&historys.length==1)
 	{
 		var ch = [-1,1,0];
 		console.log(historys[0])
@@ -119,16 +119,6 @@ function callayer(board, turn, max, count, alpha) {
 	{
 		return evaluate(board)[2]
 	}
-	/*
-	if(count==1)
-	{
-		console.time("child_kill")
-		var killer = maxkill(board,turn,1);
-		console.timeEnd("child_kill")
-		if(killer!=false)
-			return -100000;
-
-	}*/
 	var childs = choices(board,turn)
 	var best=max?-99999999:99999999;
 	for (var i = 0; i < childs.length; i++) {

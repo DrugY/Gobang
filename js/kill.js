@@ -1,6 +1,7 @@
 function killchoices(board,turn,main)
 {
 	var five=[]
+	var hfour=[]
 	var four=[]
 	var tthree=[]
 	var three=[]
@@ -43,14 +44,18 @@ function killchoices(board,turn,main)
 					if(scores[turn]>=100000)
 						return [true,[p,q]];
 					else if(scores[1-turn]>=100000)
-						return [false,[p,q]];
+						five.push([p,q]);
 					else if(scores[turn]>=10000)
-						return [true,[p,q]];
+						hfour.push([p,q]);
 					else if(scores[1-turn]>=10000)
-						four.push([p,q])
+						four.push([p,q]);
 				}
 			}
 		}
+	if(!main&&five.length)
+		return [false,five[0]];
+	else if(!main&&hfour.length)
+		return [true,hfour[0]];
 	return [false].concat(four.concat(tthree.concat(three)));
 }
 
