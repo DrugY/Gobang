@@ -18,6 +18,8 @@ function calscore(len,block)
 		return 100000;
 	if(block==2)
 		return 0
+	if(len==4&&block==1)
+		killflag4=true;
 	var match=[1,10,100,1000,10000];
 	return match[len-block]
 }
@@ -90,7 +92,7 @@ function doscore(row,color)
 				}
 				else if(!bblock&&!block)//不堵
 				{
-					score+=calscore(Math.min(tlen+1,4),1)-2*calscore(tlen-len,1);//伪tlen+1
+					score+=calscore(Math.min(tlen,3),0)-2*calscore(tlen-len,1);//伪tlen+1
 					bflag=true;
 				}
 				else//堵一个

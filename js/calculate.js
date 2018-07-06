@@ -96,13 +96,13 @@ function calnext(board, turn) {
 		return killer;
 	}
 	var childs = choices(board,turn)
-	flag=false
 	var besti = 0;
 	var best = -99999999;
 	for (var i = 0; i < childs.length; i++) {
 		board[childs[i][0]][childs[i][1]] = turn;
 		mainz.cal(childs[i][0],childs[i][1],turn);
 		var score = callayer(board, 1 - turn, false, 1, best);
+		//console.log(childs,score)
 		if (score > best) {
 			besti = i;
 			best = score

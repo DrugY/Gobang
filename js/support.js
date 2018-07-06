@@ -69,8 +69,16 @@ function dochess(x,y,c){ //落子 c=黑0:白1
     chessboard[y][x]=c;
     mainz.cal(y,x,c);
     historys.push([y,x]);
+    if(historys.length==10)
+        maxdepth=8;
+    if(historys.length==20)
+        maxdepth=10;
+    if(historys.length==30)
+        maxdepth=12;
+
     chessupdate=true;
     started=true;
+    //胜利判定
     var rows = flat(chessboard);
     var len=0;
     for(var j=0;j<rows.length;j++)
@@ -80,7 +88,7 @@ function dochess(x,y,c){ //落子 c=黑0:白1
             if(rows[j][k]!=c)
                 continue
             len=0;
-            for(;k<rows[j].length;k++)//存在 00*00 隐患
+            for(;k<rows[j].length;k++)
             {
                 if(rows[j][k]==c)
                     len++;

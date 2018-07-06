@@ -1,3 +1,19 @@
+function w4evaluate(board,turn)
+{
+	var rows = flat(board)
+	var score = 0;
+	var l = rows.length;
+	var flag4=false;
+	for(var i=0;i<l;i++)
+	{
+		killflag4=false;
+		score += doscore(rows[i],turn);
+		if(killflag4)
+			flag4=true;
+	}
+	return [score,flag4];
+}
+
 function killchoices(board,turn,main)
 {
 	var five=[]
@@ -32,14 +48,18 @@ function killchoices(board,turn,main)
 				else
 				{
 					var scores = new Array()
-					board[p][q] = 0
-					mainz.cal(p,q,0);
-					scores[0] = evaluate(board)[0]
-					mainz.cal(p,q,0);
-					mainz.cal(p,q,1);
-					board[p][q] = 1
-					scores[1] = evaluate(board)[1]
-					mainz.cal(p,q,1);
+					var flag4 = false;
+					var temp;
+					board[p][q] = turn
+					mainz.cal(p,q,turn);
+					temp = w4evaluate(board,turn);
+					scores[turn] = temp[0]
+					flag4 = temp[1];
+					mainz.cal(p,q,turn);
+					mainz.cal(p,q,1-turn);
+					board[p][q] = 1-turn
+					scores[1-turn] = evaluate(board)[1-turn]
+					mainz.cal(p,q,1-turn);
 					board[p][q] = -1
 					if(scores[turn]>=100000)
 						return [true,[p,q]];
@@ -49,6 +69,8 @@ function killchoices(board,turn,main)
 						hfour.push([p,q]);
 					else if(scores[1-turn]>=10000)
 						four.push([p,q]);
+					else if(flag4&&scores[turn]>=1000)
+						three.push([p,q]);
 				}
 			}
 		}
