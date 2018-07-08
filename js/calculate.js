@@ -1,12 +1,141 @@
+importScripts("const.js","support.js");
+//const.js
+var debug=cdebug;
+var boardsize=cboardsize;
+var depth=cdepth;
+//support.js
+var mainz = new Zobrist(boardsize);
+var ematch = new Array();
+//棋盘
+var chessboard = [
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+];
+//其它
+var historys = new Array();
+var cpucolor=1;
+var killer = new Worker("./kill.js");
+//主状态
+var cresult=new Array()
+//killer状态
+var kstatus=false;
+var kresult = new Array();
+
+importScripts("evaluate.js");
+
+killer.onmessage = function(e)
+{
+	var data = e.data;
+	var target=new Array()
+	if(data.type=="finish_calculate")
+	{
+		if(data.status)
+			target=data.point;
+		else
+			target=cresult;
+		self.postMessage({
+			"type":"finish_calculate",
+			"point":target,
+			"turn":data.turn
+		});
+		//落子
+		killer.postMessage({
+			"type":"justchess",
+			"point":target,
+			"turn":data.turn
+		});
+		chessboard[target[0]][target[1]]=data.turn;
+		mainz.cal(target[0],target[1],data.turn);
+		historys.push(target);
+	}
+}
+onmessage = function(e){
+	var data=e.data;
+	switch(data.type)
+	{
+		case "justchess"://直接落子
+			killer.postMessage(data);
+			chessboard[data.point[0]][data.point[1]]=data.turn;
+			mainz.cal(data.point[0],data.point[1],data.turn);
+			historys.push(data.point);
+			break;
+		case "calculate"://落子并计算
+			//落子
+			killer.postMessage({
+				"type":"justchess",
+				"point":data.point,
+				"turn":data.turn
+			})
+			chessboard[data.point[0]][data.point[1]]=data.turn;
+			mainz.cal(data.point[0],data.point[1],data.turn);
+			historys.push(data.point);
+			//计算
+			//console.log("121")
+			cpucolor = 1-data.turn;
+			cfinished=false;
+			var targets = calnext(chessboard,1-data.turn);
+			var target = targets[1]
+			if(targets[0])
+			{
+				self.postMessage({
+					"type":"finish_calculate",
+					"point":target,
+					"turn":1-data.turn
+				});
+				//落子
+				killer.postMessage({
+					"type":"justchess",
+					"point":target,
+					"turn":1-data.turn
+				});
+				chessboard[target[0]][target[1]]=1-data.turn;
+				mainz.cal(target[0],target[1],1-data.turn);
+				historys.push(target);
+			}
+			else
+				cresult=target;
+			break;
+		case "retract"://悔棋
+			killer.postMessage(data);
+			var point1 = historys.pop();
+			chessboard[point1[0]][point1[1]]=-1;
+			mainz.cal(point1[0],point1[1],data.turn);
+
+			point1 = historys.pop();
+			chessboard[point1[0]][point1[1]]=-1;
+			mainz.cal(point1[0],point1[1],1-data.turn);
+			break;
+		default:
+			break;
+
+	}
+
+
+}
 
 function choices(board,turn) {
 	var five=[]
 	var four=[]
+	var wfour=[]
 	var tthree=[]
 	var three=[]
 	var two=[]
 	var one=[]
 	var zero=[]
+	var turntthree=false;
 
 	for (var p = 0; p < boardsize; p++)
 		for (var q = 0; q < boardsize; q++)
@@ -18,17 +147,20 @@ function choices(board,turn) {
 					continue
 				}
 				var scores = new Array()
-				board[p][q] = 0
-				mainz.cal(p,q,0);
-				scores[0] = evaluate(board)[0]
-				mainz.cal(p,q,0);
-				mainz.cal(p,q,1);
-				board[p][q] = 1
-				scores[1] = evaluate(board)[1]
-				mainz.cal(p,q,1);
+				var flag4=false;
+				board[p][q] = turn
+				mainz.cal(p,q,turn);
+				var temp = new Evaluate(board)
+				scores[turn] = temp.calculate(turn);
+				flag4=temp.flag4[turn];
+				mainz.cal(p,q,turn);
+				mainz.cal(p,q,1-turn);
+				board[p][q] = 1-turn;
+				scores[1-turn] = new Evaluate(board).calculate(1-turn)
+				mainz.cal(p,q,1-turn);
 				board[p][q] = -1
 				if(scores[turn]>=100000)
-					return [[p,q]];
+					return [true,[p,q]];
 				if(scores[1-turn]>=100000)
 					five.push([p,q])
 				else if(scores[turn]>=10000)
@@ -38,7 +170,9 @@ function choices(board,turn) {
 				else if(scores[turn]>=2000)
 					tthree.unshift([p,q])
 				else if(scores[1-turn]>=2000)
-					tthree.push([p,q])
+					tthree.push([p,q]);
+				else if(flag4)
+					wfour.push([p,q]);
 				else if(scores[turn]>=1000)
 					three.unshift([p,q])
 				else if(scores[1-turn]>=1000)
@@ -55,54 +189,65 @@ function choices(board,turn) {
 		}
 	if(five.length)
 	{
-		return [five[0]]
+		return [true,five[0]];
 	}
 	if(four.length)
 	{
-		return four
+		return [false].concat(four.concat(wfour));
 	}
 	if(tthree.length)
 	{
-		return tthree
+		return [false].concat(tthree.concat(wfour))
 	}
-	return three.concat(two.concat(one.concat(zero)))
+	return [false].concat(three.concat(wfour.concat(two.concat(one.concat(zero)))));
 }
-
-function getfrommax(ary, max) {
-	if (max)
-		return Math.max.apply(null, ary)
-	else
-		return Math.min.apply(null, ary)
-}
-
 
 function calnext(board, turn) {
-	if(!debug&&historys.length==0)
-		return [7,7];
-	if(!debug&&historys.length==1)
+	switch(historys.length)
 	{
-		var ch = [-1,1,0];
-		console.log(historys[0])
-		return [historys[0][0]+ch[Math.floor(Math.random()*3)],historys[0][1]+ch[Math.floor(Math.random()*2)]]
+		case 0:
+			if(!debug)
+				return [true,[7,7]];
+			break
+		case 1:
+			if(debug)
+				break;
+			var ch = [-1,1,0];
+			return [true,[historys[0][0]+ch[Math.floor(Math.random()*3)],historys[0][1]+ch[Math.floor(Math.random()*2)]]];
+		case 2:
+		case 3:
+			depth=2;
+		default:
+			depth=cdepth;
 	}
+	/*
 	console.time("killer")
 	var killer = maxkill(board,turn,1);
 	console.timeEnd("killer")
-	console.time("regular")
 	if(killer!=false)
 	{
 		console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",killer);
 		console.timeEnd("regular")
 		return killer;
 	}
+	*/
 	var childs = choices(board,turn)
-	var besti = 0;
+	//console.log(childs)
+	if(childs[0]==false)
+	{
+		//传递信息
+		kstatus=false;
+		killer.postMessage({
+			"turn":turn,
+			"type":"calculate"
+		});
+	}
+	var besti = -1;
 	var best = -99999999;
-	for (var i = 0; i < childs.length; i++) {
+	for (var i = 1; i < childs.length; i++) {
 		board[childs[i][0]][childs[i][1]] = turn;
 		mainz.cal(childs[i][0],childs[i][1],turn);
 		var score = callayer(board, 1 - turn, false, 1, best);
-		//console.log(childs,score)
 		if (score > best) {
 			besti = i;
 			best = score
@@ -110,18 +255,17 @@ function calnext(board, turn) {
 		board[childs[i][0]][childs[i][1]] = -1;
 		mainz.cal(childs[i][0],childs[i][1],turn);
 	}
-	console.timeEnd("regular")
-	return childs[besti]
+	return [childs[0],childs[besti]]
 }
 
 function callayer(board, turn, max, count, alpha) {
 	if (count == depth)
 	{
-		return evaluate(board)[2]
+		return (new Evaluate(board).calculate(2));
 	}
 	var childs = choices(board,turn)
 	var best=max?-99999999:99999999;
-	for (var i = 0; i < childs.length; i++) {
+	for (var i = 1; i < childs.length; i++) {
 		//回溯法
 		board[childs[i][0]][childs[i][1]] = turn;
 		mainz.cal(childs[i][0],childs[i][1],turn);

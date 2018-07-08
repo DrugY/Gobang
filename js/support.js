@@ -45,65 +45,20 @@ function flat(board)
     return rows;
 
 }
-
-
-
-
-//绘制落子
-function drawchess(x,y,c)
+//提取一条--辅助flat
+function getarow(board,i,j,changei,changej)
 {
-    var color;
-    if (c)
-        color="white";
-    else
-        color="black";
-    var cxt=document.getElementById("background").getContext("2d");
-    cxt.beginPath();
-    cxt.arc(x*35+22,y*35+22,12,0,360);
-    cxt.fillStyle=color;
-    cxt.fill();
-    cxt.closePath();
-}
-
-function dochess(x,y,c){ //落子 c=黑0:白1
-    chessboard[y][x]=c;
-    mainz.cal(y,x,c);
-    historys.push([y,x]);
-    if(historys.length==10)
-        maxdepth=8;
-    if(historys.length==20)
-        maxdepth=10;
-    if(historys.length==30)
-        maxdepth=12;
-
-    chessupdate=true;
-    started=true;
-    //胜利判定
-    var rows = flat(chessboard);
-    var len=0;
-    for(var j=0;j<rows.length;j++)
+    var row = new Array()
+    while(i>=0&&i<boardsize&&j>=0&&j<boardsize)
     {
-        for(var k=0;k<rows[j].length;k++)
-        {
-            if(rows[j][k]!=c)
-                continue
-            len=0;
-            for(;k<rows[j].length;k++)
-            {
-                if(rows[j][k]==c)
-                    len++;
-                else
-                    break;
-            }
-            if(len>=5)
-            {
-                finished=true;
-                return;
-            }
-        }
+        row.push((board[i][j]))
+        i+=changei
+        j+=changej
     }
+    return row
 }
 
+//查看在一定范围内是否有棋子
 function hasNeighbor(board,i,j,x,y)
 {
     for(var p=Math.max(i-x,0);p<=Math.min(i+x,boardsize-1);p++)
@@ -113,6 +68,7 @@ function hasNeighbor(board,i,j,x,y)
     return false
 }
 
+//深拷贝
 function deepcopy(obj) {
     var out = [],i = 0,len = obj.length;
     for (; i < len; i++)
@@ -127,9 +83,10 @@ function deepcopy(obj) {
     return out;
 }
 
-var Zobrist = function()
+//Zobrist哈希
+var Zobrist = function(size)
 {
-    this.size=boardsize;
+    this.size=size;
     this.zero = [];
     this.one = [];
     for(var i=0;i<this.size*this.size;i++) {

@@ -1,17 +1,80 @@
-function w4evaluate(board,turn)
-{
-	var rows = flat(board)
-	var score = 0;
-	var l = rows.length;
-	var flag4=false;
-	for(var i=0;i<l;i++)
+importScripts("const.js","evaluate.js","support.js");
+//const.js
+var debug=cdebug;
+var boardsize=cboardsize;
+var maxdepth=cmaxdepth;
+//support.js
+var mainz = new Zobrist(boardsize);
+var ematch = new Array();
+//棋盘
+var chessboard = [
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+];
+//其它
+var historys = new Array();
+var cpucolor=1;
+
+onmessage = function(e){
+	var data=e.data;
+	switch(data.type)
 	{
-		killflag4=false;
-		score += doscore(rows[i],turn);
-		if(killflag4)
-			flag4=true;
+		case "justchess"://直接落子
+			chessboard[data.point[0]][data.point[1]]=data.turn;
+			mainz.cal(data.point[0],data.point[1],data.turn);
+			historys.push(data.point);
+			break;
+		case "calculate"://计算
+			//计算
+			cpucolor = data.turn;
+			//console.log("111")
+			var result=maxkill(chessboard,data.turn,1);
+			console.log("message_return",result)
+			//返回消息
+			if(result)
+			{
+				self.postMessage({
+					"type":"finish_calculate",
+					"status":true,
+					"point":result,
+					"turn":data.turn
+				});
+			}
+			else
+			{
+				self.postMessage({
+					"type":"finish_calculate",
+					"status":false,
+					"turn":data.turn
+				});
+			}
+			break
+		case "retract"://悔棋
+			var point1 = historys.pop();
+			chessboard[point1[0]][point1[1]]=-1;
+			mainz.cal(point1[0],point1[1],data.turn);
+
+			point1 = historys.pop();
+			chessboard[point1[0]][point1[1]]=-1;
+			mainz.cal(point1[0],point1[1],1-data.turn);
+			break;
+		default:
+			break;
+
 	}
-	return [score,flag4];
 }
 
 function killchoices(board,turn,main)
@@ -33,7 +96,7 @@ function killchoices(board,turn,main)
 					var score;
 					board[p][q] = turn;
 					mainz.cal(p,q,turn);
-					score = evaluate(board)[turn];
+					score = new Evaluate(board).calculate(turn);
 					mainz.cal(p,q,turn);
 					board[p][q] = -1
 					if(score>=100000)
@@ -49,16 +112,15 @@ function killchoices(board,turn,main)
 				{
 					var scores = new Array()
 					var flag4 = false;
-					var temp;
 					board[p][q] = turn
 					mainz.cal(p,q,turn);
-					temp = w4evaluate(board,turn);
-					scores[turn] = temp[0]
-					flag4 = temp[1];
+					var temp = new Evaluate(board)
+					scores[turn] = temp.calculate(turn)
+					flag4 = temp.flag4[turn];
 					mainz.cal(p,q,turn);
 					mainz.cal(p,q,1-turn);
 					board[p][q] = 1-turn
-					scores[1-turn] = evaluate(board)[1-turn]
+					scores[1-turn] = new Evaluate(board).calculate(1-turn)
 					mainz.cal(p,q,1-turn);
 					board[p][q] = -1
 					if(scores[turn]>=100000)
@@ -85,6 +147,7 @@ function killchoices(board,turn,main)
 
 function maxkill(board,turn,deep)
 {
+
 	if(deep>maxdepth)
 		return false
 	var childs = killchoices(board,turn,true)

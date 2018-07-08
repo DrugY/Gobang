@@ -1,133 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
 	<title>五子棋</title>
 </head>
 <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="js/const.js" type="text/javascript"></script>
 <script type="text/javascript">
-	//全局变量
+	//棋盘
+	var chessboard = [
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+	];
+	//游戏模式
+	var debug=cdebug;
+	//游戏参数
+	var boardsize=cboardsize;
+	var depth=cdepth;
+	var maxdepth=cmaxdepth;
+
+	var historys = [];
 	var turn=0; //轮到黑棋:0/白棋:1
 
-	var chessboard = [
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
-	];
-/*
-	var chessboard = [
-[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-[-1,-1,-1,-1,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1],
-[-1,-1,0,-1,1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1],
-[-1,-1,-1,1,1,1,0,-1,0,-1,-1,-1,-1,-1,-1],
-[-1,-1,1,0,1,-1,-1,1,-1,0,1,-1,-1,-1,-1],
-[-1,1,-1,-1,-1,1,1,0,1,1,0,-1,-1,-1,-1],
-[0,-1,0,1,0,0,1,-1,0,1,0,1,-1,-1,-1],
-[-1,-1,-1,-1,1,1,0,0,0,1,0,-1,-1,-1,-1],
-[-1,-1,-1,-1,1,0,-1,1,0,0,0,0,1,-1,-1],
-[-1,-1,-1,-1,0,1,0,0,0,1,1,-1,-1,-1,-1],
-[-1,-1,-1,1,0,-1,-1,0,1,-1,-1,-1,-1,-1,-1],
-[-1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,-1],
-[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
-
-	];*/
-	//游戏模式
-	var debug=false;
-
-	//游戏参数
-	var boardsize=15
-	var depth=4
-	var maxdepth=6;
-	var cpucolor=1;
-	var historys = [];
-
-	//临时参数
-	var killflag4=false;
-	//统计数据
-	var acounttemp=0;
-	var tacountt=0;
-
 	//游戏状态
-	var loading=false
+	var calculating=false;
 	var started=false;
 	var finished=false;
-	var chessupdate=true;
+</script>
+<script src="js/support.js" type="text/javascript"></script>
+<script src="js/draw.js" type="text/javascript"></script>
+<script type="text/javascript">
 
-</script>
-<script type="text/javascript" src="js/support.js"></script>
-<script type="text/javascript">
-	var mainz = new Zobrist();
-	var ematch = new Array();
-	function dodraw()
-	{
-		if(chessupdate)
-		{
-			for(var i=0;i<boardsize;i++)
-				for(var k = 0; k < boardsize; k++)
-					if(chessboard[i][k]>=0)
-					{
-						drawchess(k,i,chessboard[i][k])
-					}
-			chessupdate=false;
-		}
-	}
-	var drawchesses = setInterval("dodraw()",200);
-</script>
-<script type="text/javascript" src="js/evaluate.js"></script>
-<script type="text/javascript" src="js/calculate.js"></script>
-<script type="text/javascript" src="js/kill.js"></script>
-<script type="text/javascript">
 	window.onload=function(){
 
-	/*初始化*/
-		//显示大小
-		var background=document.getElementById("background")
-		var doback = document.getElementById("back")
-		var doexport = document.getElementById("export")
-		var youfirst = document.getElementById("youfirst")
+		var background=document.getElementById("background");
+		background.style.left=parseInt((document.body.clientWidth-background.width)/2).toString()+"px";
+		var doback = document.getElementById("back");
+		var doexport = document.getElementById("export");
+		var youfirst = document.getElementById("youfirst");
+		var calculater = new Worker("./js/calculate.js");
 
+
+		//电脑先手
 		youfirst.onclick = function(e)
 		{
 			if(started)
 				return;
-			cpucolor=0;
+			calculater.postMessage({
+				"type" : "justchess",
+				"point" : [7,7],
+				"turn" : 0
+			});
 			dochess(7,7,0);
 			turn=1;
 		}
 
+		//悔棋
 		doback.onclick = function(e)
 		{
 			var ev = e || window.event;
 			var cxt=document.getElementById("background").getContext("2d");
 			var len = historys.length;
-			if (len<2)
+			if (calculating||len<2)
 				return
+
+			calculater.postMessage({
+				"type" : "retract",
+				"turn" : 1-turn
+			});
+
 			var point1 = historys.pop()
 			chessboard[point1[0]][point1[1]]=-1;
-			mainz.cal(point1[0],point1[1],cpucolor);
 			cxt.clearRect(point1[1]*35+10,point1[0]*35+10,25,25)
 
 			point1 = historys.pop()
 			chessboard[point1[0]][point1[1]]=-1;
-			mainz.cal(point1[0],point1[1],1-cpucolor);
 			cxt.clearRect(point1[1]*35+10,point1[0]*35+10,25,25)
 
 			finished=false;
 		}
 
+		//棋盘状态导出
 		doexport.onclick = function(e)
 		{
 			var str="";
@@ -138,11 +104,12 @@
 			console.log(str);
 		}
 
-
-		background.style.left=parseInt((document.body.clientWidth-background.width)/2).toString()+"px";
+		//消除棋盘右击菜单
 		background.oncontextmenu = function(e){
             e.preventDefault();
         };
+
+        /*DEBUG用，按键定位*/
         background.onmouseup = function(e)
         {
         	var ev = e || window.event;
@@ -154,13 +121,16 @@
 			var ty = parseInt(y/35+0.5)
 			console.log(ty,tx)
         }
-	/*键盘点击操作*/
-		background.onclick=function(e){
 
-			if(loading||finished)
+        //棋盘点击操作
+		background.onclick=function(e){
+			//判断是否可下棋
+			if(calculating||finished)
 				return;
 			else
-				loading=true
+				calculating=true;
+
+			//点击定位
 			var ev = e || window.event;
 			var x = ev.offsetX-22
 			var y = ev.offsetY-22
@@ -168,29 +138,43 @@
 			var ty = parseInt(y/35+0.5)
 			if(chessboard[ty][tx]!=-1)
 			{
-				loading=false;
+				calculating=false;
 				return;
 			}
-			/*
-			var dev=10    //允许误差像素值
-			console.log("clicked？", Math.abs(x-tx*35)>dev, Math.abs(y-ty*35)>dev, chessboard[ty][tx]!=-1);
-			if (Math.abs(x-tx*35)>dev || Math.abs(y-ty*35)>dev || chessboard[ty][tx]!=-1){
-				return;
-			}
-			*/
 			console.log("clicked!");
-			if(historys.length<4)
-				depth=2;
-			else
-				depth=4
+
+			//下棋
 			dochess(tx,ty,turn)
 			turn=1-turn;
-			target = calnext(chessboard,turn)
-			console.log(target)
-			dochess(target[1],target[0],turn)
-			turn=1-turn
-			loading=false
+			if(finished)
+			{
+				calculating=false;
+				return
+			}
+			//传递消息开始计算
+			calculater.postMessage({
+				"type" : "calculate",
+				"point" : [ty,tx],
+				"turn" : 1-turn
+			});
+			console.time("Runtime")
 		}
+		calculater.onmessage = function(e)
+		{
+			var data=e.data;
+			if(data.type=="finish_calculate")
+			{
+				if(turn!=data.turn)
+				{
+					console.log("Turn ERROR!");
+					return;
+				}
+				console.timeEnd("Runtime")
+				dochess(data.point[1],data.point[0],data.turn);
+				turn=1-turn;
+				calculating=false;
+			}
+		};
 	}
 
 	window.onresize=function(){
