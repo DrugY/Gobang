@@ -7,23 +7,7 @@ var depth=cdepth;
 var mainz = new Zobrist(boardsize);
 var ematch = new Array();
 //棋盘
-var chessboard = [
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
-	[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
-];
+var chessboard = cchessboard;
 //其它
 var historys = new Array();
 var cpucolor=1;
@@ -83,7 +67,6 @@ onmessage = function(e){
 			mainz.cal(data.point[0],data.point[1],data.turn);
 			historys.push(data.point);
 			//计算
-			//console.log("121")
 			cpucolor = 1-data.turn;
 			cfinished=false;
 			var targets = calnext(chessboard,1-data.turn);
@@ -220,19 +203,8 @@ function calnext(board, turn) {
 		default:
 			depth=cdepth;
 	}
-	/*
-	console.time("killer")
-	var killer = maxkill(board,turn,1);
-	console.timeEnd("killer")
-	if(killer!=false)
-	{
-		console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",killer);
-		console.timeEnd("regular")
-		return killer;
-	}
-	*/
 	var childs = choices(board,turn)
-	//console.log(childs)
+	//console.log(childs);
 	if(childs[0]==false)
 	{
 		//传递信息
@@ -241,6 +213,10 @@ function calnext(board, turn) {
 			"turn":turn,
 			"type":"calculate"
 		});
+	}
+	else
+	{
+		return childs;
 	}
 	var besti = -1;
 	var best = -99999999;

@@ -169,6 +169,7 @@ Evaluate.prototype.calculate = function(turn)
 		if(!ematch.hasOwnProperty(mainz.code))
 			ematch[mainz.code]=new Array()
 		ematch[mainz.code][1]=score1;
+		return score1;
 	}
 	if(!ematch.hasOwnProperty(mainz.code))
 			ematch[mainz.code]=new Array()
