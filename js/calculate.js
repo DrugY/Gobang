@@ -12,11 +12,9 @@ var chessboard = cchessboard;
 var historys = new Array();
 var cpucolor=1;
 var killer = new Worker("./kill.js");
-//主状态
 var cresult=new Array()
-//killer状态
-var kstatus=false;
-var kresult = new Array();
+var alle=0;
+var one=0;
 
 importScripts("evaluate.js");
 
@@ -199,7 +197,9 @@ function calnext(board, turn) {
 			return [true,[historys[0][0]+ch[Math.floor(Math.random()*3)],historys[0][1]+ch[Math.floor(Math.random()*2)]]];
 		case 2:
 		case 3:
+		case 4:
 			depth=2;
+			break;
 		default:
 			depth=cdepth;
 	}

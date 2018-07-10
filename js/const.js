@@ -3,7 +3,7 @@ var cdebug=false;
 //游戏参数
 var cboardsize=15;
 var cdepth=4;
-var cmaxdepth=8;
+var cmaxdepth=10;
 /*
 var cchessboard = [
 [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],

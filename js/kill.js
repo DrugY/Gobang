@@ -11,7 +11,8 @@ var chessboard = cchessboard;
 //其它
 var historys = new Array();
 var cpucolor=1;
-
+var alle=0;
+var one=0;
 onmessage = function(e){
 	var data=e.data;
 	switch(data.type)
@@ -26,7 +27,7 @@ onmessage = function(e){
 			cpucolor = data.turn;
 			//console.log("111")
 			var result=maxkill(chessboard,data.turn,1);
-			console.log("message_return",result)
+			console.log("message_return")
 			//返回消息
 			if(result)
 			{
