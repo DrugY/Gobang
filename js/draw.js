@@ -31,13 +31,38 @@ function dochess(x,y,c){ //落子 c=黑0:白1
         color="white";
     else
         color="black";
+    var core=[x*35+22,y*35+22];
     var cxt=document.getElementById("background").getContext("2d");
     cxt.beginPath();
-    cxt.arc(x*35+22,y*35+22,12,0,360);
+    cxt.arc(core[0],core[1],12,0,360);
     cxt.fillStyle=color;
     cxt.fill();
     cxt.closePath();
 
+    cxt.strokeStyle = "red";
+    cxt.lineWidth = 2;
+    cxt.beginPath();
+    cxt.moveTo(core[0]-6, core[1]);
+    cxt.lineTo(core[0]-2, core[1]);
+    cxt.moveTo(core[0]+2, core[1]);
+    cxt.lineTo(core[0]+6, core[1]);
+    cxt.moveTo(core[0], core[1]-6);
+    cxt.lineTo(core[0], core[1]-2);
+    cxt.moveTo(core[0], core[1]+2);
+    cxt.lineTo(core[0], core[1]+6);
+    cxt.closePath();
+    cxt.stroke();
+
+    if(historys.length>1)
+    {
+        var his = historys[historys.length-2];
+        cxt.beginPath();
+        cxt.arc(his[1]*35+22,his[0]*35+22,12,0,360);
+        cxt.fillStyle=color=="white"?"black":"white";
+        cxt.fill();
+        cxt.closePath();
+
+    }
     //胜利判定
     var rows = flat(chessboard);
     var len=0;

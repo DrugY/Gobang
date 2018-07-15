@@ -74,6 +74,23 @@
 			point1 = historys.pop()
 			chessboard[point1[0]][point1[1]]=-1;
 			cxt.clearRect(point1[1]*35+10,point1[0]*35+10,25,25)
+			if(historys.length>0)
+			{
+				var core=[historys[historys.length-1][1]*35+22,historys[historys.length-1][0]*35+22];
+				cxt.strokeStyle = "red";
+			    cxt.lineWidth = 2;
+			    cxt.beginPath();
+			    cxt.moveTo(core[0]-6, core[1]);
+			    cxt.lineTo(core[0]-2, core[1]);
+			    cxt.moveTo(core[0]+2, core[1]);
+			    cxt.lineTo(core[0]+6, core[1]);
+			    cxt.moveTo(core[0], core[1]-6);
+			    cxt.lineTo(core[0], core[1]-2);
+			    cxt.moveTo(core[0], core[1]+2);
+			    cxt.lineTo(core[0], core[1]+6);
+			    cxt.closePath();
+			    cxt.stroke();
+			}
 
 			finished=false;
 		}

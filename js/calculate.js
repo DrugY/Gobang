@@ -218,20 +218,25 @@ function calnext(board, turn) {
 	{
 		return childs;
 	}
-	var besti = -1;
+	var besti = [];
 	var best = -99999999;
 	for (var i = 1; i < childs.length; i++) {
 		board[childs[i][0]][childs[i][1]] = turn;
 		mainz.cal(childs[i][0],childs[i][1],turn);
 		var score = callayer(board, 1 - turn, false, 1, best);
-		if (score > best) {
-			besti = i;
-			best = score
+		if (score > best)
+		{
+			besti = [i];
+			best = score;
+		}
+		else if(score==best)
+		{
+			besti.push(i)
 		}
 		board[childs[i][0]][childs[i][1]] = -1;
 		mainz.cal(childs[i][0],childs[i][1],turn);
 	}
-	return [childs[0],childs[besti]]
+	return [childs[0],childs[besti[Math.floor(Math.random()*besti.length)]]]
 }
 
 function callayer(board, turn, max, count, alpha) {
