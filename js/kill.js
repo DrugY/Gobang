@@ -1,3 +1,4 @@
+importScripts("subworkers.js");
 importScripts("const.js","evaluate.js","support.js");
 //const.js
 var debug=cdebug;
