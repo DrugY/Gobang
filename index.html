@@ -129,7 +129,7 @@
 			var ev = e || window.event;
 			var cxt=document.getElementById("background").getContext("2d");
 			var len = historys.length;
-			if (calculating||len<2)
+			if (finished||calculating||len<2)
 				return
 
 			calculater.postMessage({
