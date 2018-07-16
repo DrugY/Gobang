@@ -17,10 +17,17 @@ function initdraw(chessboard)
     return n1<n0?1:0;
 }
 
-
+function playonchess()
+{
+    console.log("play")
+    var musics=["audio/a1.mp3","audio/a2.mp3","audio/a3.mp3"];
+    var audio = new Audio(musics[Math.floor(Math.random()*3)]);
+    audio.play();
+}
 
 function dochess(x,y,c){ //落子 c=黑0:白1
     //赋值
+    playonchess();
     chessboard[y][x]=c;
     historys.push([y,x]);
     started=true;
