@@ -7,7 +7,7 @@ var maxdepth=cmaxdepth;
 var mainz = new Zobrist(boardsize);
 var ematch = new Array();
 //棋盘
-var chessboard = cchessboard;
+var chessboard = JSON.parse(JSON.stringify(cchessboard));
 //其它
 var historys = new Array();
 var cpucolor=1;
@@ -21,6 +21,10 @@ onmessage = function(e){
 			chessboard[data.point[0]][data.point[1]]=data.turn;
 			mainz.cal(data.point[0],data.point[1],data.turn);
 			historys.push(data.point);
+			break;
+		case "clear":
+			chessboard = JSON.parse(JSON.stringify(cchessboard))
+			historys=[];
 			break;
 		case "calculate"://计算
 			//计算
