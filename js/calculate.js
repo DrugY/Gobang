@@ -14,8 +14,6 @@ var historys = new Array();
 var cpucolor=1;
 var killer = new Worker("./kill.js");
 var cresult=new Array()
-var alle=0;
-var one=0;
 
 importScripts("evaluate.js");
 

@@ -19,10 +19,7 @@ function initdraw(chessboard)
 
 function playonchess()
 {
-    console.log("play")
-    var musics=["audio/a1.mp3","audio/a2.mp3","audio/a3.mp3"];
-    var audio = new Audio(musics[Math.floor(Math.random()*3)]);
-    audio.play();
+    musics[Math.floor(Math.random()*3)].play();
 }
 
 function successdraw(from,to,color)
@@ -58,20 +55,6 @@ function dochess(x,y,c){ //落子 c=黑0:白1
     cxt.fillStyle=color;
     cxt.fill();
     cxt.closePath();
-
-    cxt.strokeStyle = "red";
-    cxt.lineWidth = 2;
-    cxt.beginPath();
-    cxt.moveTo(core[0]-6, core[1]);
-    cxt.lineTo(core[0]-2, core[1]);
-    cxt.moveTo(core[0]+2, core[1]);
-    cxt.lineTo(core[0]+6, core[1]);
-    cxt.moveTo(core[0], core[1]-6);
-    cxt.lineTo(core[0], core[1]-2);
-    cxt.moveTo(core[0], core[1]+2);
-    cxt.lineTo(core[0], core[1]+6);
-    cxt.closePath();
-    cxt.stroke();
 
     if(historys.length>1)
     {
@@ -167,6 +150,20 @@ function dochess(x,y,c){ //落子 c=黑0:白1
         finished=true;
         return;
     }
+
+    cxt.strokeStyle = "red";
+    cxt.lineWidth = 2;
+    cxt.beginPath();
+    cxt.moveTo(core[0]-6, core[1]);
+    cxt.lineTo(core[0]-2, core[1]);
+    cxt.moveTo(core[0]+2, core[1]);
+    cxt.lineTo(core[0]+6, core[1]);
+    cxt.moveTo(core[0], core[1]-6);
+    cxt.lineTo(core[0], core[1]-2);
+    cxt.moveTo(core[0], core[1]+2);
+    cxt.lineTo(core[0], core[1]+6);
+    cxt.closePath();
+    cxt.stroke();
 
 
 
