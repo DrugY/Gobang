@@ -26,6 +26,7 @@ onmessage = function(e){
 		case "clear":
 			chessboard = JSON.parse(JSON.stringify(cchessboard))
 			historys=[];
+			ematch=[];
 			break;
 		case "calculate"://计算
 			//计算

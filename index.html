@@ -113,6 +113,8 @@
 			historys=[];
 			var cxt=document.getElementById("background").getContext("2d");
 			cxt.clearRect(0,0,1000,1000);
+			var comimg=document.getElementById("comchesspng")
+			var usrimg=document.getElementById("usrchesspng")
 			if(document.getElementById("com").checked)
 			{
 				calculater.postMessage({
@@ -122,9 +124,23 @@
 				});
 				dochess(7,7,0);
 				turn=1;
+				comimg.style['background-image']="url(img/2.png)"
+				comimg.style.height="50px"
+				comimg.style.width="50px"
+
+				usrimg.style['background-image']="url(img/1.png)"
+				usrimg.style.height="50px"
+				usrimg.style.width="50px"
 			}
 			else
 			{
+				comimg.style['background-image']="url(img/1.png)"
+				comimg.style.height="50px"
+				comimg.style.width="50px"
+
+				usrimg.style['background-image']="url(img/2.png)"
+				usrimg.style.height="50px"
+				usrimg.style.width="50px"
 				turn=0;
 			}
 		}
@@ -343,8 +359,28 @@ height: 30px;
 font-size: 35px;
 text-align: center;
 }
+#usrchesspng{
+	background: url("img/2.png");
+	background-size: 100% 100%;
+	position: fixed;
+	right: 15.5%;
+	top: 74%;
+	height:50px;
+	width:50px;
+  display: block;
+}
+#comchesspng{
+	background: url("img/1.png");
+	background-size: 100% 100%;
+	position: fixed;
+	right: 15.5%;
+	top: 34%;
+	height:50px;
+	width:50px;
+  display: block;
+}
 </style>
-<body background="img/background.jpg">
+<body background="img/background.jpg" style="min-width: 900px">
 <button id="back" style="position: fixed;top: 30%; left: 20%">悔棋</button>
 <button id="youfirst" style="position: fixed;top: 40%; left: 20%">新开一局</button>
 <canvas id="background" width="535" height="535"></canvas>
@@ -360,12 +396,12 @@ text-align: center;
 </label>
 <div>
 <img src="img/com.png" style="position: fixed;right: 20.2%; top: 18%" height="150" width="150">
-<img id="comchesspng" src="img/1.png" style="position: fixed;right: 16%; top: 35%" height="50" width="50">
+<img id="comchesspng">
 <input id="comtime" class="mytime" type="text" value="00:00:00" readonly style="BACKGROUND-COLOR: transparent;position: fixed;right: 20%; top: 36%">
 </div>
 <div>
 	<img src="img/user.png" style="position: fixed;right: 20.5%; top: 58%" height="150" width="150">
 	<input id="usrtime" class="mytime" type="text" value="00:00:00" readonly style="BACKGROUND-COLOR: transparent;position: fixed;right: 20%; top: 77%">
-	<img id="usrchesspng" src="img/2.png" style="position: fixed;right: 15%; top: 74%" height="77" width="77"></div>
+	<img id="usrchesspng" >
 </body>
 </html>

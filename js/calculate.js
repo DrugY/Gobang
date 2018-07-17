@@ -57,6 +57,7 @@ onmessage = function(e){
 			killer.postMessage(data);
 			chessboard = JSON.parse(JSON.stringify(cchessboard))
 			historys=[];
+			ematch=[];
 			break;
 		case "calculate"://落子并计算
 			//落子
